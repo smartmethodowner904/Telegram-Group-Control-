@@ -2,26 +2,38 @@ const { Telegraf, Markup } = require("telegraf");
 
 const bot = new Telegraf("8661744403:AAH2rhT_U97AykZC7yNXwFjuDKiCirCXEXU");
 
+/* ================= ADMIN ID ================= */
+
 const ADMIN_ID = 8136997138;
+
+/* ================= REPLY MEMORY ================= */
+
+const replyState = {};
 
 /* ================= GROUP WELCOME ================= */
 
 bot.on("new_chat_members", async (ctx) => {
+
   try {
 
     const user = ctx.message.new_chat_members[0];
+
     const name = user.first_name;
 
     /* delete telegram join message */
+
     try {
       await ctx.deleteMessage(ctx.message.message_id);
     } catch {}
 
-    /* welcome message */
+    /* send welcome message */
+
     const msg = await ctx.reply(
+
 `🎉 Welcome ${name}
 
 👋 Welcome to our group!
+
 Feel free to ask anything 🚀`,
 
       Markup.inlineKeyboard([
@@ -41,15 +53,19 @@ Feel free to ask anything 🚀`,
     );
 
     /* auto delete after 3 min */
+
     setTimeout(async () => {
+
       try {
         await ctx.deleteMessage(msg.message_id);
       } catch {}
+
     }, 180000);
 
   } catch (err) {
     console.log(err);
   }
+
 });
 
 /* ================= START ================= */
@@ -57,6 +73,7 @@ Feel free to ask anything 🚀`,
 bot.start(async (ctx) => {
 
   return ctx.reply(
+
 `👋 Welcome ${ctx.from.first_name}
 
 ⚠️ You must join channels to use this bot`,
@@ -82,6 +99,7 @@ bot.start(async (ctx) => {
       ]
     ])
   );
+
 });
 
 /* ================= JOINED BUTTON ================= */
@@ -91,43 +109,57 @@ bot.action("joined_ok", async (ctx) => {
   await ctx.answerCbQuery();
 
   return ctx.reply(
+
 `✅ Thank you!
 
 💬 You can now send message to bot.
 
 If you have any problem,
 send text / voice / sticker / photo / gif 🚀`
+
   );
+
 });
 
-/* ================= USER MESSAGE TO ADMIN ================= */
+/* ================= USER MESSAGE ================= */
 
 bot.on("message", async (ctx) => {
 
   try {
 
-    /* ignore admin reply state */
-    if (ctx.from.id == ADMIN_ID && replyState[ADMIN_ID]) {
+    /* ignore admin reply system */
+
+    if (
+      ctx.from.id == ADMIN_ID &&
+      replyState[ADMIN_ID]
+    ) {
       return;
     }
 
     /* ignore commands */
-    if (ctx.message.text && ctx.message.text.startsWith("/")) {
+
+    if (
+      ctx.message.text &&
+      ctx.message.text.startsWith("/")
+    ) {
       return;
     }
 
     const user = ctx.from;
 
     const header =
+
 `📩 NEW USER MESSAGE
 
 👤 Name: ${user.first_name}
 🆔 ID: ${user.id}`;
 
-    /* TEXT */
+    /* ================= TEXT ================= */
+
     if (ctx.message.text) {
 
       await ctx.telegram.sendMessage(
+
         ADMIN_ID,
 
 `${header}
@@ -143,18 +175,23 @@ ${ctx.message.text}`,
             )
           ]
         ])
+
       );
 
     }
 
-    /* OTHER MEDIA */
+    /* ================= MEDIA ================= */
+
     else {
 
       await ctx.telegram.sendMessage(
+
         ADMIN_ID,
-        `${header}
+
+`${header}
 
 📎 User sent media`,
+
         Markup.inlineKeyboard([
           [
             Markup.button.callback(
@@ -163,6 +200,7 @@ ${ctx.message.text}`,
             )
           ]
         ])
+
       );
 
       await ctx.telegram.forwardMessage(
@@ -170,6 +208,7 @@ ${ctx.message.text}`,
         ctx.chat.id,
         ctx.message.message_id
       );
+
     }
 
     return ctx.reply(
@@ -179,58 +218,65 @@ ${ctx.message.text}`,
   } catch (err) {
     console.log(err);
   }
+
 });
 
-/* ================= ADMIN REPLY SYSTEM ================= */
-
-const replyState = {};
-
-/* reply button */
+/* ================= REPLY BUTTON ================= */
 
 bot.action(/reply_(.+)/, async (ctx) => {
 
-  if (ctx.from.id != ADMIN_ID) {
-    return;
+  try {
+
+    if (ctx.from.id != ADMIN_ID) {
+      return;
+    }
+
+    const userId = ctx.match[1];
+
+    replyState[ADMIN_ID] = userId;
+
+    await ctx.answerCbQuery();
+
+    return ctx.reply(
+      "✍️ Please enter your reply message:"
+    );
+
+  } catch (err) {
+    console.log(err);
   }
 
-  const userId = ctx.match[1];
-
-  replyState[ADMIN_ID] = userId;
-
-  return ctx.reply(
-    "✍️ Please enter your reply message:"
-  );
 });
 
-/* admin send reply */
+/* ================= ADMIN REPLY ================= */
 
 bot.on("text", async (ctx) => {
 
-  if (ctx.from.id != ADMIN_ID) {
-    return;
-  }
+  try {
 
-  const adminId = ctx.from.id;
+    /* only admin */
 
-  if (!replyState[adminId]) {
-    return;
-  }
+    if (ctx.from.id != ADMIN_ID) return;
 
-  const userId = replyState[adminId];
+    /* no active reply */
 
-  const text = ctx.message.text;
+    if (!replyState[ADMIN_ID]) return;
 
-  delete replyState[adminId];
+    const userId = replyState[ADMIN_ID];
 
-  const now = new Date().toLocaleString(
-    "en-US",
-    {
-      timeZone: "Asia/Dhaka"
-    }
-  );
+    const text = ctx.message.text;
 
-  await ctx.telegram.sendMessage(
-    userId,
+    delete replyState[ADMIN_ID];
+
+    const now = new Date().toLocaleString(
+      "en-US",
+      {
+        timeZone: "Asia/Dhaka"
+      }
+    );
+
+    await ctx.telegram.sendMessage(
+
+      userId,
 
 `📩 You have a reply from Admin
 
@@ -242,19 +288,25 @@ ${text}
 🕒 Bangladesh Time:
 ${now}`,
 
-    Markup.inlineKeyboard([
-      [
-        Markup.button.callback(
-          "↩ Reply Back",
-          "reply_back"
-        )
-      ]
-    ])
-  );
+      Markup.inlineKeyboard([
+        [
+          Markup.button.callback(
+            "↩ Reply Back",
+            "reply_back"
+          )
+        ]
+      ])
 
-  return ctx.reply(
-    "✅ Reply sent to user"
-  );
+    );
+
+    return ctx.reply(
+      "✅ Reply sent successfully"
+    );
+
+  } catch (err) {
+    console.log(err);
+  }
+
 });
 
 /* ================= USER REPLY BACK ================= */
@@ -266,6 +318,7 @@ bot.action("reply_back", async (ctx) => {
   return ctx.reply(
     "💬 Send your message again to contact admin"
   );
+
 });
 
 /* ================= START BOT ================= */
