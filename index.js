@@ -1,98 +1,113 @@
-const { Telegraf } = require("telegraf");
+require("dotenv").config();
+const { Telegraf, Markup } = require("telegraf");
 
-/* ================= BOT TOKEN HERE ================= */
-const bot = new Telegraf("8661744403:AAGwRX-ETaCEe2_5CHkSRIRB41Q8JnP7qe4");
+const bot = new Telegraf(process.env.BOT_TOKEN);
+const ADMIN_ID = process.env.ADMIN_ID;
 
-/* ================= START ================= */
-bot.start((ctx) => {
-  ctx.reply("🚀 Bot is alive and working!");
-});
+/* ================= CHANNEL LINKS ================= */
+const MAIN_CHANNEL = "https://t.me/+75BQ2Qw9UZI4OTM1";
+const GLOBAL_CHANNEL = "https://t.me/Global_Method_Channel";
 
-/* ================= GET USER ================= */
-function getUser(ctx) {
-  if (ctx.message?.reply_to_message) {
-    return ctx.message.reply_to_message.from.id;
-  }
+/* ================= WELCOME TEXT ================= */
+function welcome(name) {
+  return `
+🎉 Welcome ${name}
 
-  const parts = ctx.message.text.split(" ");
-  return parts[1] || null;
+👋 You are now in the group.
+
+💬 Send message if you need help:
+text / voice / photo / sticker / emoji / gif
+
+Admin will reply soon 🚀
+`;
 }
 
-/* ================= BAN ================= */
-bot.command("ban", async (ctx) => {
+/* ================= NEW MEMBER ================= */
+bot.on("new_chat_members", async (ctx) => {
   try {
-    const user = getUser(ctx);
-    if (!user) return ctx.reply("❌ Reply or use /ban user_id");
+    const user = ctx.message.new_chat_members[0];
+    const name = user.first_name;
 
-    await ctx.telegram.banChatMember(ctx.chat.id, user);
-    ctx.reply("✅ User banned");
-  } catch (e) {
-    console.log(e);
-    ctx.reply("❌ Ban failed");
+    try {
+      await ctx.deleteMessage(ctx.message.message_id);
+    } catch {}
+
+    const msg = await ctx.reply(
+      welcome(name),
+      Markup.inlineKeyboard([
+        [
+          Markup.button.url("🌍 Main Channel", MAIN_CHANNEL),
+          Markup.button.url("🌐 Global Channel", GLOBAL_CHANNEL)
+        ],
+        [
+          Markup.button.callback("✅ Joined", "joined_ok")
+        ]
+      ])
+    );
+
+    setTimeout(async () => {
+      try {
+        await ctx.deleteMessage(msg.message_id);
+      } catch {}
+    }, 120000);
+
+  } catch (err) {
+    console.log(err);
   }
 });
 
-/* ================= UNBAN ================= */
-bot.command("unban", async (ctx) => {
-  try {
-    const user = getUser(ctx);
-    if (!user) return ctx.reply("❌ Reply or use /unban user_id");
+/* ================= JOIN BUTTON ================= */
+bot.action("joined_ok", async (ctx) => {
+  await ctx.answerCbQuery();
+  return ctx.reply("✅ Live chat activated 🚀");
+});
 
-    await ctx.telegram.unbanChatMember(ctx.chat.id, user);
-    ctx.reply("✅ User unbanned");
+/* ================= FORWARD SYSTEM ================= */
+bot.on("message", async (ctx) => {
+  try {
+    const user = ctx.from;
+    const name = user.first_name;
+
+    const header =
+`📩 NEW MESSAGE
+
+👤 Name: ${name}
+🆔 ID: ${user.id}
+
+💬 Message:
+`;
+
+    if (ctx.message.text) {
+      await ctx.telegram.sendMessage(ADMIN_ID, header + ctx.message.text);
+    }
+
+    else if (ctx.message.photo) {
+      await ctx.telegram.sendMessage(ADMIN_ID, header + "[Photo]");
+      await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
+    }
+
+    else if (ctx.message.voice) {
+      await ctx.telegram.sendMessage(ADMIN_ID, header + "[Voice]");
+      await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
+    }
+
+    else if (ctx.message.sticker) {
+      await ctx.telegram.sendMessage(ADMIN_ID, header + "[Sticker]");
+      await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
+    }
+
+    else {
+      await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
+    }
+
   } catch (e) {
     console.log(e);
-    ctx.reply("❌ Unban failed");
   }
 });
 
-/* ================= MUTE ================= */
-bot.command("mute", async (ctx) => {
-  try {
-    const user = getUser(ctx);
-    if (!user) return ctx.reply("❌ Reply or use /mute user_id");
-
-    await ctx.telegram.restrictChatMember(ctx.chat.id, user, {
-      permissions: {
-        can_send_messages: false
-      }
-    });
-
-    ctx.reply("🔇 User muted");
-  } catch (e) {
-    console.log(e);
-    ctx.reply("❌ Mute failed");
-  }
-});
-
-/* ================= UNMUTE ================= */
-bot.command("unmute", async (ctx) => {
-  try {
-    const user = getUser(ctx);
-    if (!user) return ctx.reply("❌ Reply or use /unmute user_id");
-
-    await ctx.telegram.restrictChatMember(ctx.chat.id, user, {
-      permissions: {
-        can_send_messages: true,
-        can_send_media_messages: true,
-        can_send_other_messages: true,
-        can_add_web_page_previews: true
-      }
-    });
-
-    ctx.reply("🔊 User unmuted");
-  } catch (e) {
-    console.log(e);
-    ctx.reply("❌ Unmute failed");
-  }
-});
-
-/* ================= ERROR ================= */
-bot.catch((err) => console.log("Error:", err));
-
-/* ================= FIX ================= */
+/* ================= START BOT ================= */
 bot.launch({
   dropPendingUpdates: true
 });
 
-console.log("🚀 Bot Running...");
+console.log("🚀 Bot is running...");
