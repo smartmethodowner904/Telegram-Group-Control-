@@ -1,138 +1,83 @@
 const { Telegraf } = require("telegraf");
-
 const bot = new Telegraf("8661744403:AAHDilDWlaQk34txhdbuAEaZ_xCICnf2UA4");
+
+// memory DB
+const users = new Map();
+
+/* ================= SAVE USER ================= */
+bot.on("message", (ctx) => {
+  try {
+    const id = ctx.from.id;
+    const username = ctx.from.username;
+
+    users.set(username, id); // save mapping
+  } catch {}
+});
+
+/* ================= GET USER ID ================= */
+function getUserId(username) {
+  return users.get(username);
+}
 
 /* ================= BAN ================= */
 bot.command("ban", async (ctx) => {
-  try {
-    const text = ctx.message.text.split(" ");
-    let userId;
+  const text = ctx.message.text.split(" ");
 
-    if (ctx.message.reply_to_message) {
-      userId = ctx.message.reply_to_message.from.id;
-    } else if (text[1]) {
-      const username = text[1].replace("@", "");
-      const members = await ctx.telegram.getChatAdministrators(ctx.chat.id);
+  if (!text[1]) return ctx.reply("❌ Use: /ban @username");
 
-      const user = members.find(u => u.user.username === username);
-      if (!user) return ctx.reply("❌ User not found");
+  const username = text[1].replace("@", "");
+  const userId = getUserId(username);
 
-      userId = user.user.id;
-    } else {
-      return ctx.reply("❌ Use /ban @username or reply user");
-    }
-
-    await ctx.telegram.banChatMember(ctx.chat.id, userId);
-    ctx.reply("✅ User banned successfully");
-
-  } catch (err) {
-    console.log(err);
-    ctx.reply("❌ Failed to ban user");
+  if (!userId) {
+    return ctx.reply("❌ User not found (must message bot first)");
   }
-});
 
-/* ================= UNBAN ================= */
-bot.command("unban", async (ctx) => {
-  try {
-    const text = ctx.message.text.split(" ");
+  await ctx.telegram.banChatMember(ctx.chat.id, userId);
 
-    let userId;
-
-    if (ctx.message.reply_to_message) {
-      userId = ctx.message.reply_to_message.from.id;
-    } else if (text[1]) {
-      const username = text[1].replace("@", "");
-      const members = await ctx.telegram.getChatAdministrators(ctx.chat.id);
-
-      const user = members.find(u => u.user.username === username);
-      if (!user) return ctx.reply("❌ User not found");
-
-      userId = user.user.id;
-    } else {
-      return ctx.reply("❌ Use /unban @username or reply user");
-    }
-
-    await ctx.telegram.unbanChatMember(ctx.chat.id, userId);
-    ctx.reply("✅ User unbanned successfully");
-
-  } catch (err) {
-    console.log(err);
-    ctx.reply("❌ Failed to unban user");
-  }
+  ctx.reply(`✅ @${username} banned`);
 });
 
 /* ================= MUTE ================= */
 bot.command("mute", async (ctx) => {
-  try {
-    const text = ctx.message.text.split(" ");
-    let userId;
+  const text = ctx.message.text.split(" ");
 
-    if (ctx.message.reply_to_message) {
-      userId = ctx.message.reply_to_message.from.id;
-    } else if (text[1]) {
-      const username = text[1].replace("@", "");
-      const members = await ctx.telegram.getChatAdministrators(ctx.chat.id);
+  if (!text[1]) return ctx.reply("❌ Use: /mute @username");
 
-      const user = members.find(u => u.user.username === username);
-      if (!user) return ctx.reply("❌ User not found");
+  const username = text[1].replace("@", "");
+  const userId = getUserId(username);
 
-      userId = user.user.id;
-    } else {
-      return ctx.reply("❌ Use /mute @username or reply user");
-    }
-
-    await ctx.telegram.restrictChatMember(ctx.chat.id, userId, {
-      permissions: {
-        can_send_messages: false
-      }
-    });
-
-    ctx.reply("🔇 User muted successfully");
-
-  } catch (err) {
-    console.log(err);
-    ctx.reply("❌ Failed to mute user");
+  if (!userId) {
+    return ctx.reply("❌ User not found (must message first)");
   }
+
+  await ctx.telegram.restrictChatMember(ctx.chat.id, userId, {
+    permissions: { can_send_messages: false }
+  });
+
+  ctx.reply(`🔇 @${username} muted`);
 });
 
 /* ================= UNMUTE ================= */
 bot.command("unmute", async (ctx) => {
-  try {
-    const text = ctx.message.text.split(" ");
-    let userId;
+  const text = ctx.message.text.split(" ");
 
-    if (ctx.message.reply_to_message) {
-      userId = ctx.message.reply_to_message.from.id;
-    } else if (text[1]) {
-      const username = text[1].replace("@", "");
-      const members = await ctx.telegram.getChatAdministrators(ctx.chat.id);
+  const username = text[1].replace("@", "");
+  const userId = getUserId(username);
 
-      const user = members.find(u => u.user.username === username);
-      if (!user) return ctx.reply("❌ User not found");
+  if (!userId) return ctx.reply("❌ User not found");
 
-      userId = user.user.id;
-    } else {
-      return ctx.reply("❌ Use /unmute @username or reply user");
+  await ctx.telegram.restrictChatMember(ctx.chat.id, userId, {
+    permissions: {
+      can_send_messages: true,
+      can_send_media_messages: true,
+      can_send_other_messages: true
     }
+  });
 
-    await ctx.telegram.restrictChatMember(ctx.chat.id, userId, {
-      permissions: {
-        can_send_messages: true,
-        can_send_media_messages: true,
-        can_send_other_messages: true,
-        can_add_web_page_previews: true
-      }
-    });
-
-    ctx.reply("🔊 User unmuted successfully");
-
-  } catch (err) {
-    console.log(err);
-    ctx.reply("❌ Failed to unmute user");
-  }
+  ctx.reply(`🔊 @${username} unmuted`);
 });
 
 /* ================= START ================= */
 bot.launch();
 
-console.log("🚀 Group Manager Bot Running...");
+console.log("Bot running...");
