@@ -1,14 +1,13 @@
-require("dotenv").config();
 const { Telegraf, Markup } = require("telegraf");
 
-const bot = new Telegraf(process.env.BOT_TOKEN);
-const ADMIN_ID = process.env.ADMIN_ID;
+const bot = new Telegraf("8661744403:AAFfSmPVjPNiGBw85Q9eayjkSd3GLXOozQE"); // এখানে token বসাও
+const ADMIN_ID = "8136997138";
 
 /* ================= CHANNEL LINKS ================= */
 const MAIN_CHANNEL = "https://t.me/+75BQ2Qw9UZI4OTM1";
 const GLOBAL_CHANNEL = "https://t.me/Global_Method_Channel";
 
-/* ================= WELCOME TEXT ================= */
+/* ================= WELCOME ================= */
 function welcome(name) {
   return `
 🎉 Welcome ${name}
@@ -56,13 +55,13 @@ bot.on("new_chat_members", async (ctx) => {
   }
 });
 
-/* ================= JOIN BUTTON ================= */
+/* ================= BUTTON ================= */
 bot.action("joined_ok", async (ctx) => {
   await ctx.answerCbQuery();
   return ctx.reply("✅ Live chat activated 🚀");
 });
 
-/* ================= FORWARD SYSTEM ================= */
+/* ================= MESSAGE TO ADMIN ================= */
 bot.on("message", async (ctx) => {
   try {
     const user = ctx.from;
@@ -79,24 +78,7 @@ bot.on("message", async (ctx) => {
 
     if (ctx.message.text) {
       await ctx.telegram.sendMessage(ADMIN_ID, header + ctx.message.text);
-    }
-
-    else if (ctx.message.photo) {
-      await ctx.telegram.sendMessage(ADMIN_ID, header + "[Photo]");
-      await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
-    }
-
-    else if (ctx.message.voice) {
-      await ctx.telegram.sendMessage(ADMIN_ID, header + "[Voice]");
-      await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
-    }
-
-    else if (ctx.message.sticker) {
-      await ctx.telegram.sendMessage(ADMIN_ID, header + "[Sticker]");
-      await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
-    }
-
-    else {
+    } else {
       await ctx.telegram.forwardMessage(ADMIN_ID, ctx.chat.id, ctx.message.message_id);
     }
 
