@@ -1,83 +1,98 @@
 const { Telegraf } = require("telegraf");
-const bot = new Telegraf("8661744403:AAGwRX-ETaCEe2_5CHkSRIRB41Q8JnP7qe4");
 
-// memory DB
-const users = new Map();
+/* ================= BOT TOKEN HERE ================= */
+const bot = new Telegraf("YOUR_BOT_TOKEN_HERE");
 
-/* ================= SAVE USER ================= */
-bot.on("message", (ctx) => {
-  try {
-    const id = ctx.from.id;
-    const username = ctx.from.username;
-
-    users.set(username, id); // save mapping
-  } catch {}
+/* ================= START ================= */
+bot.start((ctx) => {
+  ctx.reply("🚀 Bot is alive and working!");
 });
 
-/* ================= GET USER ID ================= */
-function getUserId(username) {
-  return users.get(username);
+/* ================= GET USER ================= */
+function getUser(ctx) {
+  if (ctx.message?.reply_to_message) {
+    return ctx.message.reply_to_message.from.id;
+  }
+
+  const parts = ctx.message.text.split(" ");
+  return parts[1] || null;
 }
 
 /* ================= BAN ================= */
 bot.command("ban", async (ctx) => {
-  const text = ctx.message.text.split(" ");
+  try {
+    const user = getUser(ctx);
+    if (!user) return ctx.reply("❌ Reply or use /ban user_id");
 
-  if (!text[1]) return ctx.reply("❌ Use: /ban @username");
-
-  const username = text[1].replace("@", "");
-  const userId = getUserId(username);
-
-  if (!userId) {
-    return ctx.reply("❌ User not found (must message bot first)");
+    await ctx.telegram.banChatMember(ctx.chat.id, user);
+    ctx.reply("✅ User banned");
+  } catch (e) {
+    console.log(e);
+    ctx.reply("❌ Ban failed");
   }
+});
 
-  await ctx.telegram.banChatMember(ctx.chat.id, userId);
+/* ================= UNBAN ================= */
+bot.command("unban", async (ctx) => {
+  try {
+    const user = getUser(ctx);
+    if (!user) return ctx.reply("❌ Reply or use /unban user_id");
 
-  ctx.reply(`✅ @${username} banned`);
+    await ctx.telegram.unbanChatMember(ctx.chat.id, user);
+    ctx.reply("✅ User unbanned");
+  } catch (e) {
+    console.log(e);
+    ctx.reply("❌ Unban failed");
+  }
 });
 
 /* ================= MUTE ================= */
 bot.command("mute", async (ctx) => {
-  const text = ctx.message.text.split(" ");
+  try {
+    const user = getUser(ctx);
+    if (!user) return ctx.reply("❌ Reply or use /mute user_id");
 
-  if (!text[1]) return ctx.reply("❌ Use: /mute @username");
+    await ctx.telegram.restrictChatMember(ctx.chat.id, user, {
+      permissions: {
+        can_send_messages: false
+      }
+    });
 
-  const username = text[1].replace("@", "");
-  const userId = getUserId(username);
-
-  if (!userId) {
-    return ctx.reply("❌ User not found (must message first)");
+    ctx.reply("🔇 User muted");
+  } catch (e) {
+    console.log(e);
+    ctx.reply("❌ Mute failed");
   }
-
-  await ctx.telegram.restrictChatMember(ctx.chat.id, userId, {
-    permissions: { can_send_messages: false }
-  });
-
-  ctx.reply(`🔇 @${username} muted`);
 });
 
 /* ================= UNMUTE ================= */
 bot.command("unmute", async (ctx) => {
-  const text = ctx.message.text.split(" ");
+  try {
+    const user = getUser(ctx);
+    if (!user) return ctx.reply("❌ Reply or use /unmute user_id");
 
-  const username = text[1].replace("@", "");
-  const userId = getUserId(username);
+    await ctx.telegram.restrictChatMember(ctx.chat.id, user, {
+      permissions: {
+        can_send_messages: true,
+        can_send_media_messages: true,
+        can_send_other_messages: true,
+        can_add_web_page_previews: true
+      }
+    });
 
-  if (!userId) return ctx.reply("❌ User not found");
-
-  await ctx.telegram.restrictChatMember(ctx.chat.id, userId, {
-    permissions: {
-      can_send_messages: true,
-      can_send_media_messages: true,
-      can_send_other_messages: true
-    }
-  });
-
-  ctx.reply(`🔊 @${username} unmuted`);
+    ctx.reply("🔊 User unmuted");
+  } catch (e) {
+    console.log(e);
+    ctx.reply("❌ Unmute failed");
+  }
 });
 
-/* ================= START ================= */
-bot.launch();
+/* ================= ERROR ================= */
+bot.catch((err) => console.log("Error:", err));
 
-console.log("Bot running...");
+/* ================= FIX ================= */
+bot.launch({
+  dropPendingUpdates: true
+});
+
+console.log("🚀 Bot Running...");
