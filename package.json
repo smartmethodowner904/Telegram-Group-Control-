@@ -1,5 +1,5 @@
 {
-  "name": "group-manager-bot",
+  "name": "telegram-group-control",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
