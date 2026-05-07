@@ -26,7 +26,7 @@ bot.on("new_chat_members", async (ctx) => {
       await ctx.deleteMessage(ctx.message.message_id);
     } catch {}
 
-    /* send welcome message */
+    /* welcome message */
 
     const msg = await ctx.reply(
 
@@ -52,7 +52,7 @@ Feel free to ask anything 🚀`,
       ])
     );
 
-    /* auto delete after 3 min */
+    /* auto delete */
 
     setTimeout(async () => {
 
@@ -102,7 +102,7 @@ bot.start(async (ctx) => {
 
 });
 
-/* ================= JOINED BUTTON ================= */
+/* ================= JOIN BUTTON ================= */
 
 bot.action("joined_ok", async (ctx) => {
 
@@ -127,12 +127,9 @@ bot.on("message", async (ctx) => {
 
   try {
 
-    /* ignore admin reply system */
+    /* ignore admin messages */
 
-    if (
-      ctx.from.id == ADMIN_ID &&
-      replyState[ADMIN_ID]
-    ) {
+    if (ctx.from.id == ADMIN_ID) {
       return;
     }
 
