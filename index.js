@@ -94,6 +94,13 @@ bot.on("message", async (ctx) => {
 
     if (!GROUPS.includes(ctx.chat.id)) return;
 
+    /* ignore commands */
+
+    if (
+      ctx.message.text &&
+      ctx.message.text.startsWith("/")
+    ) return;
+
     /* group title changed */
 
     if (ctx.message.new_chat_title) {
