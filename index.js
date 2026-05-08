@@ -9,81 +9,77 @@ const GROUPS = [
   -1003996124468
 ];
 
-/* ================= GROUP SYSTEM ================= */
+/* ================= JOIN EVENT ================= */
 
-bot.on("message", async (ctx) => {
+bot.on("new_chat_members", async (ctx) => {
 
   try {
 
-    /* only work in selected groups */
-
     if (!GROUPS.includes(ctx.chat.id)) return;
 
-    /* ================= JOIN MESSAGE ================= */
+    /* delete telegram join message */
 
-    if (ctx.message.new_chat_members) {
+    try {
+      await ctx.deleteMessage(ctx.message.message_id);
+    } catch {}
 
-      /* delete telegram join message */
+    const user =
+      ctx.message.new_chat_members[0];
 
-      try {
-        await ctx.deleteMessage(ctx.message.message_id);
-      } catch {}
+    const name = user.first_name;
 
-      const user =
-        ctx.message.new_chat_members[0];
+    /* welcome message */
 
-      const name = user.first_name;
-
-      /* welcome message */
-
-      const msg = await ctx.reply(
+    const msg = await ctx.reply(
 
 `🎉 Welcome ${name}
 
 👋 Welcome to our group!`,
 
-        Markup.inlineKeyboard([
-          [
-            Markup.button.url(
-              "📢 Main Channel",
-              "https://t.me/+75BQ2Qw9UZI4OTM1"
-            )
-          ],
-          [
-            Markup.button.url(
-              "🌍 Global Method Channel",
-              "https://t.me/Global_Method_Channel"
-            )
-          ]
-        ])
+      Markup.inlineKeyboard([
+        [
+          Markup.button.url(
+            "📢 Main Channel",
+            "https://t.me/+75BQ2Qw9UZI4OTM1"
+          )
+        ],
+        [
+          Markup.button.url(
+            "🌍 Global Method Channel",
+            "https://t.me/Global_Method_Channel"
+          )
+        ]
+      ])
 
-      );
+    );
 
-      /* auto delete after 2 min */
+    /* auto delete after 2 min */
 
-      setTimeout(async () => {
-
-        try {
-          await ctx.deleteMessage(msg.message_id);
-        } catch {}
-
-      }, 120000);
-
-    }
-
-    /* ================= LEFT MESSAGE ================= */
-
-    if (ctx.message.left_chat_member) {
+    setTimeout(async () => {
 
       try {
-        await ctx.deleteMessage(ctx.message.message_id);
+        await ctx.deleteMessage(msg.message_id);
       } catch {}
 
-    }
+    }, 120000);
 
   } catch (err) {
     console.log(err);
   }
+
+});
+
+/* ================= LEFT EVENT ================= */
+
+bot.on("left_chat_member", async (ctx) => {
+
+  try {
+
+    if (!GROUPS.includes(ctx.chat.id)) return;
+
+    await ctx.deleteMessage(ctx.message.message_id);
+
+  } catch {}
 
 });
 
