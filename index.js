@@ -1,8 +1,8 @@
 const { Telegraf, Markup } = require("telegraf");
 
-const bot = new Telegraf("8585925975:AAE5Vx3BdRFbEog1i5Nl1m288Pewude8-Ro");
+const bot = new Telegraf("8585925975:AAG4go4UJMTWf61Qh8c0Y3LtoPzpAcMOUZI");
 
-/* ================= GROUP LIST ================= */
+/* ================= GROUPS ================= */
 
 const GROUPS = [
   -1002346718545,
@@ -14,24 +14,24 @@ const GROUPS = [
 const MAIN_CHANNEL_ID = -1003933615274;
 const GLOBAL_CHANNEL_ID = -1003982412106;
 
-/* ================= INVITE LINKS ================= */
+/* ================= DEFAULT LINKS ================= */
 
 let mainLink = "https://t.me/+75BQ2Qw9UZI4OTM1";
 let globalLink = "https://t.me/Global_Method_Channel";
 
-/* ================= UTIL ================= */
+/* ================= SLEEP ================= */
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/* ================= CREATE NEW LINKS ================= */
+/* ================= CREATE NEW INVITE LINKS ================= */
 
 async function createLinks(ctx) {
 
   try {
 
-    /* MAIN CHANNEL LINK */
+    /* MAIN CHANNEL */
 
     const mainInvite =
       await ctx.telegram.createChatInviteLink(
@@ -45,7 +45,7 @@ async function createLinks(ctx) {
 
     mainLink = mainInvite.invite_link;
 
-    /* GLOBAL CHANNEL LINK */
+    /* GLOBAL CHANNEL */
 
     const globalInvite =
       await ctx.telegram.createChatInviteLink(
@@ -89,18 +89,20 @@ bot.on("chat_join_request", async (ctx) => {
     );
 
   } catch (err) {
-    console.log("Join request error:", err);
+    console.log(err);
   }
 
 });
 
-/* ================= GROUP WELCOME ================= */
+/* ================= WELCOME ================= */
 
 bot.on("new_chat_members", async (ctx) => {
 
   try {
 
     if (!GROUPS.includes(ctx.chat.id)) return;
+
+    /* delete join message */
 
     try {
       await ctx.deleteMessage(
@@ -113,8 +115,10 @@ bot.on("new_chat_members", async (ctx) => {
 
     const name = user.first_name;
 
+    /* rotating messages */
+
     const messages = [
-const messages = [
+
 `🎊 Hey ${name}
 👋 Welcome to Smart Method Chat`,
 
@@ -174,8 +178,12 @@ const messages = [
 
 `🌟 Hey ${name}
 💬 Enjoy Smart Method Chat`
-];
+
+    ];
+
     let index = 0;
+
+    /* send welcome */
 
     const msg = await ctx.reply(
 
@@ -209,6 +217,8 @@ const messages = [
     );
 
     let running = true;
+
+    /* rotating text */
 
     async function rotate() {
 
@@ -247,7 +257,8 @@ const messages = [
 
                   [
                     {
-                      text: "♻️ Generate",
+                      text:
+                        "♻️ Generate",
                       callback_data:
                         "generate_links"
                     }
@@ -268,6 +279,8 @@ const messages = [
     }
 
     rotate();
+
+    /* auto delete after 2 min */
 
     setTimeout(async () => {
 
@@ -307,7 +320,8 @@ bot.action(
 
           [
             {
-              text: "📢 Main Channel",
+              text:
+                "📢 Main Channel",
               url: mainLink
             }
           ],
@@ -322,7 +336,8 @@ bot.action(
 
           [
             {
-              text: "✅ Create Done",
+              text:
+                "✅ Create Done",
               callback_data:
                 "generate_links"
             }
@@ -348,6 +363,18 @@ bot.on("message", async (ctx) => {
     if (!GROUPS.includes(ctx.chat.id))
       return;
 
+    /* delete left msg */
+
+    if (ctx.message.left_chat_member) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+    /* delete title change */
+
     if (ctx.message.new_chat_title) {
 
       return ctx.deleteMessage(
@@ -356,15 +383,9 @@ bot.on("message", async (ctx) => {
 
     }
 
+    /* delete photo change */
+
     if (ctx.message.new_chat_photo) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
-
-    }
-
-    if (ctx.message.left_chat_member) {
 
       return ctx.deleteMessage(
         ctx.message.message_id
@@ -422,17 +443,20 @@ bot.start(async (ctx) => {
 
 /* ================= JOINED ================= */
 
-bot.action("joined_ok", async (ctx) => {
+bot.action(
+  "joined_ok",
+  async (ctx) => {
 
-  await ctx.answerCbQuery();
+    await ctx.answerCbQuery();
 
-  return ctx.reply(
-    "✅ Bot Unlock Successful"
-  );
+    return ctx.reply(
+      "✅ Bot Unlock Successful"
+    );
 
-});
+  }
+);
 
-/* ================= START BOT ================= */
+/* ================= BOT START ================= */
 
 bot.launch({
   dropPendingUpdates: true
