@@ -1,58 +1,119 @@
 const { Telegraf, Markup } = require("telegraf");
 
-const bot = new Telegraf("8585925975:AAFRUy-JNf8B4KUztnEofI7HfvXDXsMNG3s");
+const bot = new Telegraf("8657244529:AAGUOKVbskkPNXX8lukI3q9NfrmHJDp-U1I");
 
-/* GROUPS */
+/* ================= GROUPS ================= */
+
 const GROUPS = [
-  -1003723410396,
-  -1002346718545
+  -1002346718545,
+  -1003723410396
 ];
 
-/* CHANNELS */
-const MAIN_CHANNEL_ID = -1003871207695;
-const GLOBAL_CHANNEL_ID = -1003766522560;
+/* ================= CHANNEL IDS ================= */
 
-/* LINKS */
-let mainLink = "https://t.me/yourmain";
-let globalLink = "https://t.me/yourglobal";
+const MAIN_CHANNEL_ID = -1002315458574;
+const GLOBAL_CHANNEL_ID = -1002510081290;
 
-/* SLEEP */
-const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+/* ================= DEFAULT LINKS ================= */
 
-/* CREATE LINKS */
-async function createLinks(ctx) {
-  try {
-    const main = await ctx.telegram.createChatInviteLink(
-      MAIN_CHANNEL_ID,
-      { expire_date: Math.floor(Date.now() / 1000) + 3600, member_limit: 1 }
-    );
+let mainLink = "https://t.me/+75BQ2Qw9UZI4OTM1";
+let globalLink = "https://t.me/Global_Method_Channel";
 
-    const global = await ctx.telegram.createChatInviteLink(
-      GLOBAL_CHANNEL_ID,
-      { expire_date: Math.floor(Date.now() / 1000) + 3600, member_limit: 1 }
-    );
+/* ================= SLEEP ================= */
 
-    mainLink = main.invite_link;
-    globalLink = global.invite_link;
-
-  } catch (e) {
-    console.log(e);
-  }
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/* JOIN EVENT (IMPORTANT FIX) */
-bot.on("new_chat_members", async (ctx) => {
+/* ================= CREATE LINKS ================= */
 
-  if (!GROUPS.includes(ctx.chat.id)) return;
+async function createLinks(ctx) {
 
   try {
-    await ctx.deleteMessage(ctx.message.message_id);
-  } catch {}
 
-  const user = ctx.message.new_chat_members[0];
-  const name = user.first_name;
+    const mainInvite =
+      await ctx.telegram.createChatInviteLink(
+        MAIN_CHANNEL_ID,
+        {
+          expire_date:
+            Math.floor(Date.now() / 1000) + 3600,
+          member_limit: 1
+        }
+      );
 
-  const messages = [
+    mainLink = mainInvite.invite_link;
+
+  } catch (err) {
+    console.log("Main link error");
+  }
+
+  try {
+
+    const globalInvite =
+      await ctx.telegram.createChatInviteLink(
+        GLOBAL_CHANNEL_ID,
+        {
+          expire_date:
+            Math.floor(Date.now() / 1000) + 3600,
+          member_limit: 1
+        }
+      );
+
+    globalLink = globalInvite.invite_link;
+
+  } catch (err) {
+    console.log("Global link error");
+  }
+
+}
+
+/* ================= AUTO APPROVE ================= */
+
+bot.on("chat_join_request", async (ctx) => {
+
+  try {
+
+    if (!GROUPS.includes(ctx.chat.id))
+      return;
+
+    await ctx.approveChatJoinRequest(
+      ctx.from.id
+    );
+
+  } catch (err) {
+    console.log(err);
+  }
+
+});
+
+/* ================= NEW MEMBER ================= */
+
+bot.on("new_chat_members", async (ctx) => {
+
+  try {
+
+    if (!GROUPS.includes(ctx.chat.id))
+      return;
+
+    /* delete telegram join msg */
+
+    try {
+      await ctx.deleteMessage(
+        ctx.message.message_id
+      );
+    } catch {}
+
+    /* create fresh links */
+
+    await createLinks(ctx);
+
+    const user =
+      ctx.message.new_chat_members[0];
+
+    const name = user.first_name;
+
+    const messages = [
+
 `🎊 Hey ${name}
 👋 Welcome to Smart Method Chat`,
 
@@ -112,74 +173,284 @@ bot.on("new_chat_members", async (ctx) => {
 
 `🌟 Hey ${name}
 💬 Enjoy Smart Method Chat`
-];
 
-  let i = 0;
+    ];
 
-  const msg = await ctx.reply(
-    messages[0],
-    Markup.inlineKeyboard([
-      [Markup.button.url("📢 Main Channel", mainLink)],
-      [Markup.button.url("🌍 Global Channel", globalLink)]
-    ])
-  );
+    let index = 0;
 
-  const interval = setInterval(async () => {
+    const msg = await ctx.reply(
+
+      messages[0],
+
+      Markup.inlineKeyboard([
+
+        [
+          Markup.button.url(
+            "📢 Main Channel",
+            mainLink
+          )
+        ],
+
+        [
+          Markup.button.url(
+            "🌍 Global Method Channel",
+            globalLink
+          )
+        ],
+
+        [
+          Markup.button.callback(
+            "♻️ Generate",
+            "generate_links"
+          )
+        ]
+
+      ])
+
+    );
+
+    let running = true;
+
+    async function rotate() {
+
+      while (running) {
+
+        await sleep(3000);
+
+        try {
+
+          index =
+            (index + 1) % messages.length;
+
+          await ctx.telegram.editMessageText(
+
+            ctx.chat.id,
+            msg.message_id,
+            undefined,
+            messages[index],
+
+            {
+              reply_markup: {
+                inline_keyboard: [
+
+                  [
+                    {
+                      text: "📢 Main Channel",
+                      url: mainLink
+                    }
+                  ],
+
+                  [
+                    {
+                      text:
+                        "🌍 Global Method Channel",
+                      url: globalLink
+                    }
+                  ],
+
+                  [
+                    {
+                      text:
+                        "♻️ Generate",
+                      callback_data:
+                        "generate_links"
+                    }
+                  ]
+
+                ]
+              }
+            }
+
+          );
+
+        } catch {}
+
+      }
+
+    }
+
+    rotate();
+
+    /* auto delete */
+
+    setTimeout(async () => {
+
+      running = false;
+
+      try {
+        await ctx.deleteMessage(
+          msg.message_id
+        );
+      } catch {}
+
+    }, 120000);
+
+  } catch (err) {
+    console.log(err);
+  }
+
+});
+
+/* ================= GENERATE ================= */
+
+bot.action(
+  "generate_links",
+  async (ctx) => {
+
     try {
-      i = (i + 1) % messages.length;
 
-      await ctx.telegram.editMessageText(
-        ctx.chat.id,
-        msg.message_id,
-        undefined,
-        messages[i],
-        {
-          reply_markup: {
-            inline_keyboard: [
-              [{ text: "📢 Main Channel", url: mainLink }],
-              [{ text: "🌍 Global Channel", url: globalLink }]
-            ]
-          }
-        }
+      await ctx.answerCbQuery(
+        "Generating..."
       );
 
-    } catch {}
-  }, 4000); // safe delay (NOT 3 sec crash fix)
+      await createLinks(ctx);
 
-  setTimeout(async () => {
-    clearInterval(interval);
-    try {
-      await ctx.deleteMessage(msg.message_id);
-    } catch {}
-  }, 120000);
+      await ctx.editMessageReplyMarkup({
 
-});
+        inline_keyboard: [
 
-/* CLEAN EVENTS */
-bot.on("message", async (ctx) => {
-  if (!GROUPS.includes(ctx.chat.id)) return;
+          [
+            {
+              text:
+                "📢 Main Channel",
+              url: mainLink
+            }
+          ],
 
-  if (ctx.message.left_chat_member ||
-      ctx.message.new_chat_title ||
-      ctx.message.new_chat_photo) {
-    try {
-      await ctx.deleteMessage(ctx.message.message_id);
-    } catch {}
+          [
+            {
+              text:
+                "🌍 Global Method Channel",
+              url: globalLink
+            }
+          ],
+
+          [
+            {
+              text:
+                "✅ Create Done",
+              callback_data:
+                "generate_links"
+            }
+          ]
+
+        ]
+
+      });
+
+    } catch (err) {
+      console.log(err);
+    }
+
   }
+);
+
+/* ================= CLEAN SYSTEM ================= */
+
+bot.on("message", async (ctx) => {
+
+  try {
+
+    if (!GROUPS.includes(ctx.chat.id))
+      return;
+
+    /* left msg */
+
+    if (ctx.message.left_chat_member) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+    /* title changed */
+
+    if (ctx.message.new_chat_title) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+    /* photo changed */
+
+    if (ctx.message.new_chat_photo) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+  } catch {}
+
 });
 
-/* START */
+/* ================= START ================= */
+
 bot.start(async (ctx) => {
+
   return ctx.reply(
-    `👋 Welcome ${ctx.from.first_name}`,
+
+`👋 Welcome ${ctx.from.first_name}`,
+
     Markup.inlineKeyboard([
-      [Markup.button.url("📢 Main Channel", mainLink)],
-      [Markup.button.url("🌍 Global Channel", globalLink)]
+
+      [
+        Markup.button.url(
+          "📢 Main Channel",
+          mainLink
+        )
+      ],
+
+      [
+        Markup.button.url(
+          "🌍 Global Method Channel",
+          globalLink
+        )
+      ],
+
+      [
+        Markup.button.callback(
+          "♻️ Generate",
+          "generate_links"
+        )
+      ],
+
+      [
+        Markup.button.callback(
+          "✅ Joined",
+          "joined_ok"
+        )
+      ]
+
     ])
+
   );
+
 });
 
-/* LAUNCH */
-bot.launch({ dropPendingUpdates: true });
+/* ================= JOINED ================= */
+
+bot.action(
+  "joined_ok",
+  async (ctx) => {
+
+    await ctx.answerCbQuery();
+
+    return ctx.reply(
+      "✅ Bot Unlock Successful"
+    );
+
+  }
+);
+
+/* ================= BOT START ================= */
+
+bot.launch({
+  dropPendingUpdates: true
+});
 
 console.log("🚀 Bot Running...");
