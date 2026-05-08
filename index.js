@@ -1,10 +1,13 @@
 const { Telegraf, Markup } = require("telegraf");
 
-const bot = new Telegraf("8661744403:AAFvIQxQl9FBmUdxZCJm9ettf2KzAc1xHsA");
+const bot = new Telegraf("YOUR_BOT_TOKEN");
 
-/* ================= ONLY THIS GROUP ================= */
+/* ================= ALLOWED GROUPS ================= */
 
-const GROUP_ID = -1002346718545;
+const GROUPS = [
+  -1002346718545,
+  -1003996124468
+];
 
 /* ================= GROUP SYSTEM ================= */
 
@@ -12,11 +15,11 @@ bot.on("message", async (ctx) => {
 
   try {
 
-    /* only work in your group */
+    /* only work in selected groups */
 
-    if (ctx.chat.id !== GROUP_ID) return;
+    if (!GROUPS.includes(ctx.chat.id)) return;
 
-    /* ================= DELETE JOIN MESSAGE ================= */
+    /* ================= JOIN MESSAGE ================= */
 
     if (ctx.message.new_chat_members) {
 
@@ -68,7 +71,7 @@ bot.on("message", async (ctx) => {
 
     }
 
-    /* ================= DELETE LEFT MESSAGE ================= */
+    /* ================= LEFT MESSAGE ================= */
 
     if (ctx.message.left_chat_member) {
 
