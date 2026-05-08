@@ -86,33 +86,38 @@ bot.on("chat_join_request", async (ctx) => {
 
 });
 
-/* ================= NEW MEMBER ================= */
+/* ================= MESSAGE SYSTEM ================= */
 
-bot.on("new_chat_members", async (ctx) => {
+bot.on("message", async (ctx) => {
 
   try {
 
     if (!GROUPS.includes(ctx.chat.id))
       return;
 
-    /* delete telegram join msg */
+    /* ================= JOIN DETECT FIX ================= */
 
-    try {
-      await ctx.deleteMessage(
-        ctx.message.message_id
-      );
-    } catch {}
+    const members =
+      ctx.message.new_chat_members ||
+      ctx.update.message.new_chat_members;
 
-    /* create fresh links */
+    if (members) {
 
-    await createLinks(ctx);
+      try {
+        await ctx.deleteMessage(
+          ctx.message.message_id
+        );
+      } catch {}
 
-    const user =
-      ctx.message.new_chat_members[0];
+      /* create fresh links */
 
-    const name = user.first_name;
+      await createLinks(ctx);
 
-    const messages = [
+      const user = members[0];
+
+      const name = user.first_name;
+
+      const messages = [
 
 `🎊 Hey ${name}
 👋 Welcome to Smart Method Chat`,
@@ -174,116 +179,148 @@ bot.on("new_chat_members", async (ctx) => {
 `🌟 Hey ${name}
 💬 Enjoy Smart Method Chat`
 
-    ];
+      ];
 
-    let index = 0;
+      let index = 0;
 
-    const msg = await ctx.reply(
+      const msg = await ctx.reply(
 
-      messages[0],
+        messages[0],
 
-      Markup.inlineKeyboard([
+        Markup.inlineKeyboard([
 
-        [
-          Markup.button.url(
-            "📢 Main Channel",
-            mainLink
-          )
-        ],
+          [
+            Markup.button.url(
+              "📢 Main Channel",
+              mainLink
+            )
+          ],
 
-        [
-          Markup.button.url(
-            "🌍 Global Method Channel",
-            globalLink
-          )
-        ],
+          [
+            Markup.button.url(
+              "🌍 Global Method Channel",
+              globalLink
+            )
+          ],
 
-        [
-          Markup.button.callback(
-            "♻️ Generate",
-            "generate_links"
-          )
-        ]
+          [
+            Markup.button.callback(
+              "♻️ Generate",
+              "generate_links"
+            )
+          ]
 
-      ])
+        ])
 
-    );
+      );
 
-    let running = true;
+      let running = true;
 
-    async function rotate() {
+      async function rotate() {
 
-      while (running) {
+        while (running) {
 
-        await sleep(3000);
+          await sleep(3000);
 
-        try {
+          try {
 
-          index =
-            (index + 1) % messages.length;
+            index =
+              (index + 1) % messages.length;
 
-          await ctx.telegram.editMessageText(
+            await ctx.telegram.editMessageText(
 
-            ctx.chat.id,
-            msg.message_id,
-            undefined,
-            messages[index],
+              ctx.chat.id,
+              msg.message_id,
+              undefined,
+              messages[index],
 
-            {
-              reply_markup: {
-                inline_keyboard: [
+              {
+                reply_markup: {
+                  inline_keyboard: [
 
-                  [
-                    {
-                      text: "📢 Main Channel",
-                      url: mainLink
-                    }
-                  ],
+                    [
+                      {
+                        text: "📢 Main Channel",
+                        url: mainLink
+                      }
+                    ],
 
-                  [
-                    {
-                      text:
-                        "🌍 Global Method Channel",
-                      url: globalLink
-                    }
-                  ],
+                    [
+                      {
+                        text:
+                          "🌍 Global Method Channel",
+                        url: globalLink
+                      }
+                    ],
 
-                  [
-                    {
-                      text:
-                        "♻️ Generate",
-                      callback_data:
-                        "generate_links"
-                    }
+                    [
+                      {
+                        text:
+                          "♻️ Generate",
+                        callback_data:
+                          "generate_links"
+                      }
+                    ]
+
                   ]
-
-                ]
+                }
               }
-            }
 
-          );
+            );
 
-        } catch {}
+          } catch {}
+
+        }
 
       }
 
+      rotate();
+
+      /* auto delete */
+
+      setTimeout(async () => {
+
+        running = false;
+
+        try {
+          await ctx.deleteMessage(
+            msg.message_id
+          );
+        } catch {}
+
+      }, 120000);
+
     }
 
-    rotate();
+    /* ================= LEFT MSG ================= */
 
-    /* auto delete */
+    if (ctx.message.left_chat_member) {
 
-    setTimeout(async () => {
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
 
-      running = false;
+    }
 
-      try {
-        await ctx.deleteMessage(
-          msg.message_id
-        );
-      } catch {}
+    /* ================= TITLE CHANGE ================= */
 
-    }, 120000);
+    if (ctx.message.new_chat_title) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+    /* ================= PHOTO CHANGE ================= */
+
+    if (ctx.message.new_chat_photo) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
 
   } catch (err) {
     console.log(err);
@@ -344,49 +381,6 @@ bot.action(
 
   }
 );
-
-/* ================= CLEAN SYSTEM ================= */
-
-bot.on("message", async (ctx) => {
-
-  try {
-
-    if (!GROUPS.includes(ctx.chat.id))
-      return;
-
-    /* left msg */
-
-    if (ctx.message.left_chat_member) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
-
-    }
-
-    /* title changed */
-
-    if (ctx.message.new_chat_title) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
-
-    }
-
-    /* photo changed */
-
-    if (ctx.message.new_chat_photo) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
-
-    }
-
-  } catch {}
-
-});
 
 /* ================= START ================= */
 
