@@ -114,7 +114,7 @@ bot.on("new_chat_members", async (ctx) => {
     const name = user.first_name;
 
     const messages = [
-
+const messages = [
 `🎊 Hey ${name}
 👋 Welcome to Smart Method Chat`,
 
@@ -128,10 +128,53 @@ bot.on("new_chat_members", async (ctx) => {
 📢 Join our channels below`,
 
 `✨ Hey ${name}
-👑 You are now part of Smart Family`
+👑 You are now part of Smart Family`,
 
-    ];
+`📣 Hey ${name}
+⚡ Don’t miss updates`,
 
+`💡 Hey ${name}
+📊 Learn & grow here`,
+
+`🎁 Hey ${name}
+🎉 Enjoy your stay`,
+
+`🌍 Hey ${name}
+🔥 Global community`,
+
+`💬 Hey ${name}
+📌 Be active always`,
+
+`🚀 Hey ${name}
+⚡ Let’s grow together`,
+
+`🎊 Hey ${name}
+👋 Happy to have you`,
+
+`📢 Hey ${name}
+🔥 Follow rules`,
+
+`💡 Hey ${name}
+📣 Stay connected`,
+
+`🎯 Hey ${name}
+👑 Smart Method Family`,
+
+`✨ Hey ${name}
+🚀 Explore opportunities`,
+
+`📊 Hey ${name}
+💬 Chat & learn`,
+
+`🔥 Hey ${name}
+📌 Important member`,
+
+`🎊 Hey ${name}
+👋 Welcome again`,
+
+`🌟 Hey ${name}
+💬 Enjoy Smart Method Chat`
+];
     let index = 0;
 
     const msg = await ctx.reply(
