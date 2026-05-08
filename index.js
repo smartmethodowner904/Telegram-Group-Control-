@@ -11,8 +11,8 @@ const GROUPS = [
 
 /* ================= CHANNEL IDS ================= */
 
-const MAIN_CHANNEL_ID = --1002315458574;
-const GLOBAL_CHANNEL_ID = --1002510081290;
+const MAIN_CHANNEL_ID = -1002315458574;
+const GLOBAL_CHANNEL_ID = -1002510081290;
 
 /* ================= DEFAULT LINKS ================= */
 
