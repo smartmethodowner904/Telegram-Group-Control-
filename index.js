@@ -1,6 +1,6 @@
 const { Telegraf, Markup } = require("telegraf");
 
-const bot = new Telegraf("8661744403:AAFvIQxQl9FBmUdxZCJm9ettf2KzAc1xHsA");
+const bot = new Telegraf("8585925975:AAG4go4UJMTWf61Qh8c0Y3LtoPzpAcMOUZI");
 
 /* ================= ALLOWED GROUPS ================= */
 
