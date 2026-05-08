@@ -2,12 +2,9 @@ const { Telegraf, Markup } = require("telegraf");
 
 const bot = new Telegraf("8585925975:AAEOfStXgUt-CJ85r072WvjoxT9_cNRhONo");
 
-/* ================= GROUPS ================= */
+/* ================= ONLY GROUP ================= */
 
-const GROUPS = [
-  -1002346718545,
-  -1003996124468
-];
+const GROUP_ID = -1002346718545;
 
 /* ================= CHANNEL IDS ================= */
 
@@ -25,7 +22,7 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-/* ================= CREATE NEW INVITE LINKS ================= */
+/* ================= CREATE LINKS ================= */
 
 async function createLinks(ctx) {
 
@@ -45,6 +42,12 @@ async function createLinks(ctx) {
 
     mainLink = mainInvite.invite_link;
 
+  } catch (err) {
+    console.log("Main link error");
+  }
+
+  try {
+
     /* GLOBAL CHANNEL */
 
     const globalInvite =
@@ -60,49 +63,20 @@ async function createLinks(ctx) {
     globalLink = globalInvite.invite_link;
 
   } catch (err) {
-    console.log("Invite Error:", err);
+    console.log("Global link error");
   }
 
 }
 
-/* ================= AUTO JOIN REQUEST APPROVE ================= */
-
-bot.on("chat_join_request", async (ctx) => {
-
-  try {
-
-    if (!GROUPS.includes(ctx.chat.id)) return;
-
-    await ctx.approveChatJoinRequest(
-      ctx.from.id
-    );
-
-    const name = ctx.from.first_name;
-
-    await ctx.telegram.sendMessage(
-      ctx.from.id,
-
-`🎉 Welcome ${name}
-
-✅ Your join request approved
-👋 You can now access the group`
-    );
-
-  } catch (err) {
-    console.log(err);
-  }
-
-});
-
-/* ================= WELCOME ================= */
+/* ================= JOIN EVENT ================= */
 
 bot.on("new_chat_members", async (ctx) => {
 
   try {
 
-    if (!GROUPS.includes(ctx.chat.id)) return;
+    if (ctx.chat.id !== GROUP_ID) return;
 
-    /* delete join message */
+    /* delete telegram join msg */
 
     try {
       await ctx.deleteMessage(
@@ -110,12 +84,14 @@ bot.on("new_chat_members", async (ctx) => {
       );
     } catch {}
 
+    /* create fresh links */
+
+    await createLinks(ctx);
+
     const user =
       ctx.message.new_chat_members[0];
 
     const name = user.first_name;
-
-    /* rotating messages */
 
     const messages = [
 
@@ -183,8 +159,6 @@ bot.on("new_chat_members", async (ctx) => {
 
     let index = 0;
 
-    /* send welcome */
-
     const msg = await ctx.reply(
 
       messages[0],
@@ -218,11 +192,11 @@ bot.on("new_chat_members", async (ctx) => {
 
     let running = true;
 
-    /* rotating text */
-
     async function rotate() {
 
       while (running) {
+
+        await sleep(3000);
 
         try {
 
@@ -271,8 +245,6 @@ bot.on("new_chat_members", async (ctx) => {
           );
 
         } catch {}
-
-        await sleep(3000);
 
       }
 
@@ -360,10 +332,10 @@ bot.on("message", async (ctx) => {
 
   try {
 
-    if (!GROUPS.includes(ctx.chat.id))
+    if (ctx.chat.id !== GROUP_ID)
       return;
 
-    /* delete left msg */
+    /* left msg */
 
     if (ctx.message.left_chat_member) {
 
@@ -373,7 +345,7 @@ bot.on("message", async (ctx) => {
 
     }
 
-    /* delete title change */
+    /* title changed */
 
     if (ctx.message.new_chat_title) {
 
@@ -383,7 +355,7 @@ bot.on("message", async (ctx) => {
 
     }
 
-    /* delete photo change */
+    /* photo changed */
 
     if (ctx.message.new_chat_photo) {
 
@@ -456,7 +428,7 @@ bot.action(
   }
 );
 
-/* ================= BOT START ================= */
+/* ================= START BOT ================= */
 
 bot.launch({
   dropPendingUpdates: true
