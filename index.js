@@ -2,9 +2,12 @@ const { Telegraf, Markup } = require("telegraf");
 
 const bot = new Telegraf("8585925975:AAEOfStXgUt-CJ85r072WvjoxT9_cNRhONo");
 
-/* ================= ONLY GROUP ================= */
+/* ================= GROUPS ================= */
 
-const GROUP_ID = -1002346718545;
+const GROUPS = [
+  -1002346718545,
+  -1003723410396
+];
 
 /* ================= CHANNEL IDS ================= */
 
@@ -28,8 +31,6 @@ async function createLinks(ctx) {
 
   try {
 
-    /* MAIN CHANNEL */
-
     const mainInvite =
       await ctx.telegram.createChatInviteLink(
         MAIN_CHANNEL_ID,
@@ -47,8 +48,6 @@ async function createLinks(ctx) {
   }
 
   try {
-
-    /* GLOBAL CHANNEL */
 
     const globalInvite =
       await ctx.telegram.createChatInviteLink(
@@ -68,13 +67,33 @@ async function createLinks(ctx) {
 
 }
 
-/* ================= JOIN EVENT ================= */
+/* ================= AUTO APPROVE ================= */
+
+bot.on("chat_join_request", async (ctx) => {
+
+  try {
+
+    if (!GROUPS.includes(ctx.chat.id))
+      return;
+
+    await ctx.approveChatJoinRequest(
+      ctx.from.id
+    );
+
+  } catch (err) {
+    console.log(err);
+  }
+
+});
+
+/* ================= NEW MEMBER ================= */
 
 bot.on("new_chat_members", async (ctx) => {
 
   try {
 
-    if (ctx.chat.id !== GROUP_ID) return;
+    if (!GROUPS.includes(ctx.chat.id))
+      return;
 
     /* delete telegram join msg */
 
@@ -252,7 +271,7 @@ bot.on("new_chat_members", async (ctx) => {
 
     rotate();
 
-    /* auto delete after 2 min */
+    /* auto delete */
 
     setTimeout(async () => {
 
@@ -272,7 +291,7 @@ bot.on("new_chat_members", async (ctx) => {
 
 });
 
-/* ================= GENERATE BUTTON ================= */
+/* ================= GENERATE ================= */
 
 bot.action(
   "generate_links",
@@ -332,7 +351,7 @@ bot.on("message", async (ctx) => {
 
   try {
 
-    if (ctx.chat.id !== GROUP_ID)
+    if (!GROUPS.includes(ctx.chat.id))
       return;
 
     /* left msg */
@@ -428,7 +447,7 @@ bot.action(
   }
 );
 
-/* ================= START BOT ================= */
+/* ================= BOT START ================= */
 
 bot.launch({
   dropPendingUpdates: true
