@@ -6,7 +6,7 @@ const bot = new Telegraf("8657244529:AAGUOKVbskkPNXX8lukI3q9NfrmHJDp-U1I");
 
 const GROUPS = [
   -1002346718545,
-  -1003723410396
+  -1003527248014
 ];
 
 /* ================= CHANNEL IDS ================= */
