@@ -32,7 +32,7 @@ bot.on("new_chat_members", async (ctx) => {
 
     const msg = await ctx.reply(
 
-`🎊 Hey {name}
+`🎊 Hey ${name}
 
 👋 Welcome to Smart Method Chat
 
@@ -81,6 +81,38 @@ bot.on("left_chat_member", async (ctx) => {
     if (!GROUPS.includes(ctx.chat.id)) return;
 
     await ctx.deleteMessage(ctx.message.message_id);
+
+  } catch {}
+
+});
+
+/* ================= DELETE GROUP UPDATE MESSAGE ================= */
+
+bot.on("message", async (ctx) => {
+
+  try {
+
+    if (!GROUPS.includes(ctx.chat.id)) return;
+
+    /* group title changed */
+
+    if (ctx.message.new_chat_title) {
+
+      await ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+    /* group photo changed */
+
+    if (ctx.message.new_chat_photo) {
+
+      await ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
 
   } catch {}
 
