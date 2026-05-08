@@ -32,9 +32,12 @@ bot.on("new_chat_members", async (ctx) => {
 
     const msg = await ctx.reply(
 
-`🎉 Welcome ${name}
+`🎊 Hey {name}
 
-👋 Welcome to our group!`,
+👋 Welcome to Smart Method Chat
+
+📌 Join all channels below to stay updated
+🔥 Be Active & Enjoy`,
 
       Markup.inlineKeyboard([
         [
