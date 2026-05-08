@@ -5,14 +5,14 @@ const bot = new Telegraf("8585925975:AAEOfStXgUt-CJ85r072WvjoxT9_cNRhONo");
 /* ================= GROUPS ================= */
 
 const GROUPS = [
-  -1003527248014,
-  -1003723410396
+  -1003723410396,
+  -1002346718545
 ];
 
 /* ================= CHANNEL IDS ================= */
 
-const MAIN_CHANNEL_ID = -1002315458574;
-const GLOBAL_CHANNEL_ID = -1002510081290;
+const MAIN_CHANNEL_ID = -1003871207695;
+const GLOBAL_CHANNEL_ID = -1003766522560;
 
 /* ================= DEFAULT LINKS ================= */
 
