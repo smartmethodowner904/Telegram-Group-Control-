@@ -2,177 +2,142 @@ const { Telegraf, Markup } = require("telegraf");
 
 const bot = new Telegraf("8585925975:AAEBTJeK8kg82XiJoJ4-Cs6xe-Wi2Bjbq1I");
 
-/* ================= CONFIGURATION ================= */
+/* ================= PREMIUM EMOJI ID ================= */
+const EMOJI_ID = "5294000307074790591";
+const EMOJI_CHAR = "⦿";
 
-const GROUPS = [-1002346718545, -1003994441271];
-const MAIN_CHANNEL_ID = -1002315458574;
-const GLOBAL_CHANNEL_ID = -1002510081290;
+/* ================= GROUPS ================= */
+const GROUPS = [
+  -1002346718545,
+  -1003527248014
+];
 
-let mainLink = "https://t.me/+75BQ2Qw9UZI4OTM1";
-let globalLink = "https://t.me/Global_Method_Channel";
+/* ================= MESSAGES (20) ================= */
+const messages = [
 
-// আপনার দেওয়া Premium Emoji ID
-const PREMIUM_EMOJI_ID = "5294000307074790591";
+`🎊 Hey Welcome ${EMOJI_CHAR}\n👋 Smart Method Group-এ স্বাগতম!`,
+`🔥 Welcome Buddy ${EMOJI_CHAR}\n📌 Stay active`,
+`🚀 Hello ${EMOJI_CHAR}\n💬 Ask anything`,
+`🎯 Welcome New Member ${EMOJI_CHAR}`,
+`✨ You are now family ${EMOJI_CHAR}`,
+`📣 Stay connected ${EMOJI_CHAR}`,
+`💡 Learn & grow ${EMOJI_CHAR}`,
+`🎁 Enjoy your stay ${EMOJI_CHAR}`,
+`🌍 Global community ${EMOJI_CHAR}`,
+`💬 Be active ${EMOJI_CHAR}`,
+`🚀 Let’s grow together ${EMOJI_CHAR}`,
+`🎊 Happy to have you ${EMOJI_CHAR}`,
+`📢 Follow rules ${EMOJI_CHAR}`,
+`💡 Stay safe ${EMOJI_CHAR}`,
+`🎯 Smart Family ${EMOJI_CHAR}`,
+`✨ Explore more ${EMOJI_CHAR}`,
+`📊 Learn daily ${EMOJI_CHAR}`,
+`🔥 Important member ${EMOJI_CHAR}`,
+`🎊 Welcome again ${EMOJI_CHAR}`,
+`🌟 Enjoy chat ${EMOJI_CHAR}`
 
-/* ================= UTILS ================= */
+];
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+/* ================= EMOJI BUILDER ================= */
+function buildMessage(text, name) {
+
+  const finalText = text.replace("Welcome", `Welcome ${name}`);
+
+  const index = finalText.indexOf(EMOJI_CHAR);
+
+  let entities = [];
+
+  if (index !== -1) {
+    entities.push({
+      type: "custom_emoji",
+      offset: index,
+      length: 1,
+      custom_emoji_id: EMOJI_ID
+    });
+  }
+
+  return { text: finalText, entities };
 }
 
-async function createLinks(ctx) {
-  try {
-    const mainInvite = await ctx.telegram.createChatInviteLink(MAIN_CHANNEL_ID, {
-      expire_date: Math.floor(Date.now() / 1000) + 3600,
-      member_limit: 1
-    });
-    mainLink = mainInvite.invite_link;
-  } catch (err) { console.log("Main link error"); }
-
-  try {
-    const globalInvite = await ctx.telegram.createChatInviteLink(GLOBAL_CHANNEL_ID, {
-      expire_date: Math.floor(Date.now() / 1000) + 3600,
-      member_limit: 1
-    });
-    globalLink = globalInvite.invite_link;
-  } catch (err) { console.log("Global link error"); }
-}
-
-/* ================= AUTO APPROVE ================= */
-
-bot.on("chat_join_request", async (ctx) => {
-  try {
-    if (!GROUPS.includes(ctx.chat.id)) return;
-    await ctx.approveChatJoinRequest(ctx.from.id);
-  } catch (err) { console.log(err); }
-});
-
-/* ================= WELCOME SYSTEM ================= */
-
+/* ================= NEW MEMBER ================= */
 bot.on("new_chat_members", async (ctx) => {
+
   try {
+
     if (!GROUPS.includes(ctx.chat.id)) return;
+
+    try {
+      await ctx.deleteMessage(ctx.message.message_id);
+    } catch {}
 
     const user = ctx.message.new_chat_members[0];
     const name = user.first_name;
-    await createLinks(ctx);
-
-    const messages = [
-      `⭐ Hey ${name}\n👋 Welcome to Smart Method Chat`,
-      `⭐ Hey ${name}\n📌 Stay active & enjoy`,
-      `⭐ Hey ${name}\n💬 Feel free to ask anything`,
-      `⭐ Hey ${name}\n📢 Join our channels below`,
-      `⭐ Hey ${name}\n👑 You are now part of Smart Family`,
-      `⭐ Hey ${name}\n⚡ Don’t miss updates`,
-      `⭐ Hey ${name}\n📊 Learn & grow here`,
-      `⭐ Hey ${name}\n🎉 Enjoy your stay`,
-      `⭐ Hey ${name}\n🔥 Global community`,
-      `⭐ Hey ${name}\n📌 Be active always`,
-      `⭐ Hey ${name}\n⚡ Let’s grow together`,
-      `⭐ Hey ${name}\n👋 Happy to have you`,
-      `⭐ Hey ${name}\n🔥 Follow rules`,
-      `⭐ Hey ${name}\n📣 Stay connected`,
-      `⭐ Hey ${name}\n👑 Smart Method Family`,
-      `⭐ Hey ${name}\n🚀 Explore opportunities`,
-      `⭐ Hey ${name}\n💬 Chat & learn`,
-      `⭐ Hey ${name}\n📌 Important member`,
-      `⭐ Hey ${name}\n👋 Welcome again`,
-      `⭐ Hey ${name}\n💬 Enjoy Smart Method Chat`
-    ];
 
     let index = 0;
 
-    // মেসেজের শুরুতে থাকা "⭐" কে Premium Emoji তে রূপান্তর করার ফাংশন
-    const getExtraParams = (text) => ({
-      entities: [
-        {
-          offset: 0,
-          length: 2, // "⭐ " এর দৈর্ঘ্য
-          type: "custom_emoji",
-          custom_emoji_id: PREMIUM_EMOJI_ID
-        }
-      ],
-      ...Markup.inlineKeyboard([
-        [Markup.button.url("📢 Main Channel", mainLink)],
-        [Markup.button.url("🌍 Global Method Channel", globalLink)],
-        [Markup.button.callback("♻️ Generate", "generate_links")]
-      ])
+    const first = buildMessage(messages[0], name);
+
+    const msg = await ctx.reply(first.text, {
+      entities: first.entities,
+      reply_markup: {
+        inline_keyboard: [
+          [{ text: "📢 Main Channel", url: "https://t.me/yourlink" }],
+          [{ text: "🌍 Global Channel", url: "https://t.me/yourlink" }]
+        ]
+      }
     });
-
-    const msg = await ctx.reply(messages[0], getExtraParams(messages[0]));
-
-    // Delete Join Message
-    setTimeout(async () => {
-      try { await ctx.deleteMessage(ctx.message.message_id); } catch {}
-    }, 5000);
 
     let running = true;
 
-    // Rotating Text with Premium Emoji Support
     async function rotate() {
+
       while (running) {
-        await sleep(3000);
+
+        await new Promise(r => setTimeout(r, 3000));
+
+        index = (index + 1) % messages.length;
+
+        const data = buildMessage(messages[index], name);
+
         try {
-          index = (index + 1) % messages.length;
           await ctx.telegram.editMessageText(
             ctx.chat.id,
             msg.message_id,
             undefined,
-            messages[index],
-            getExtraParams(messages[index])
+            data.text,
+            {
+              entities: data.entities,
+              reply_markup: {
+                inline_keyboard: [
+                  [{ text: "📢 Main Channel", url: "https://t.me/yourlink" }],
+                  [{ text: "🌍 Global Channel", url: "https://t.me/yourlink" }]
+                ]
+              }
+            }
           );
-        } catch { running = false; }
+        } catch {}
+
       }
+
     }
+
     rotate();
 
-    // Auto Delete Welcome Message
-    setTimeout(async () => {
+    setTimeout(() => {
       running = false;
-      try { await ctx.deleteMessage(msg.message_id); } catch {}
     }, 120000);
 
-  } catch (err) { console.log(err); }
+  } catch (err) {
+    console.log(err);
+  }
+
 });
 
-/* ================= ACTIONS & CLEANUP ================= */
-
-bot.action("generate_links", async (ctx) => {
-  try {
-    await ctx.answerCbQuery("Generating...");
-    await createLinks(ctx);
-    await ctx.editMessageReplyMarkup({
-      inline_keyboard: [
-        [{ text: "📢 Main Channel", url: mainLink }],
-        [{ text: "🌍 Global Method Channel", url: globalLink }],
-        [{ text: "✅ Create Done", callback_data: "generate_links" }]
-      ]
-    });
-  } catch (err) { console.log(err); }
+/* ================= START ================= */
+bot.start((ctx) => {
+  return ctx.reply("Bot Running...");
 });
 
-bot.on("message", async (ctx) => {
-  try {
-    if (!GROUPS.includes(ctx.chat.id)) return;
-    if (ctx.message.left_chat_member || ctx.message.new_chat_title || ctx.message.new_chat_photo) {
-      return ctx.deleteMessage(ctx.message.message_id);
-    }
-  } catch {}
-});
+bot.launch();
 
-bot.start(async (ctx) => {
-  return ctx.reply(`👋 Welcome ${ctx.from.first_name}`, Markup.inlineKeyboard([
-    [Markup.button.url("📢 Main Channel", mainLink)],
-    [Markup.button.url("🌍 Global Method Channel", globalLink)],
-    [Markup.button.callback("♻️ Generate", "generate_links")],
-    [Markup.button.callback("✅ Joined", "joined_ok")]
-  ]));
-});
-
-bot.action("joined_ok", async (ctx) => {
-  await ctx.answerCbQuery();
-  return ctx.reply("✅ Bot Unlock Successful");
-});
-
-bot.launch({ dropPendingUpdates: true });
-console.log("🚀 Bot Running with Premium Emoji Support...");
+console.log("🚀 Bot Running...");
