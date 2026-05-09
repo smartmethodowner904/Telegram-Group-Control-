@@ -19,6 +19,25 @@ const GLOBAL_CHANNEL_ID = -1002510081290;
 let mainLink = "https://t.me/+75BQ2Qw9UZI4OTM1";
 let globalLink = "https://t.me/Global_Method_Channel";
 
+/* ================= PREMIUM EMOJIS ================= */
+
+const EMOJIS = {
+  fire: `<tg-emoji emoji-id="5368324170671202286">🔥</tg-emoji>`,
+  wave: `<tg-emoji emoji-id="5222102031224074514">👋</tg-emoji>`,
+  pin: `<tg-emoji emoji-id="5348140027698227662">📌</tg-emoji>`,
+  rocket: `<tg-emoji emoji-id="5350507166539783758">🚀</tg-emoji>`,
+  target: `<tg-emoji emoji-id="5357197206953169862">🎯</tg-emoji>`,
+  crown: `<tg-emoji emoji-id="5359459605665543692">👑</tg-emoji>`,
+  gift: `<tg-emoji emoji-id="5361735750968679136">🎁</tg-emoji>`,
+  global: `<tg-emoji emoji-id="5370869711888194012">🌍</tg-emoji>`,
+  msg: `<tg-emoji emoji-id="5443038326535759644">💬</tg-emoji>`,
+  spark: `<tg-emoji emoji-id="5224378213548571173">✨</tg-emoji>`,
+  party: `<tg-emoji emoji-id="5269470000000000001">🎊</tg-emoji>`,
+  megaphone: `<tg-emoji emoji-id="5355096209521817726">📢</tg-emoji>`,
+  generate: `<tg-emoji emoji-id="5386367538735104399">♻️</tg-emoji>`,
+  done: `<tg-emoji emoji-id="5237699328848219334">✅</tg-emoji>`
+};
+
 /* ================= SLEEP ================= */
 
 function sleep(ms) {
@@ -95,8 +114,6 @@ bot.on("message", async (ctx) => {
     if (!GROUPS.includes(ctx.chat.id))
       return;
 
-    /* ================= JOIN DETECT FIX ================= */
-
     const members =
       ctx.message.new_chat_members ||
       ctx.update.message.new_chat_members;
@@ -109,80 +126,36 @@ bot.on("message", async (ctx) => {
         );
       } catch {}
 
-      /* create fresh links */
-
       await createLinks(ctx);
 
       const user = members[0];
-
       const name = user.first_name;
-
-      /* PREMIUM EMOJI */
-
-      const premiumEmoji =
-`<tg-emoji emoji-id="5368324170671202286">🔥</tg-emoji>`;
 
       const messages = [
 
-`${premiumEmoji} Hey ${name}
-👋 Welcome to Smart Method Chat`,
+`${EMOJIS.party} Hey ${name}
+${EMOJIS.wave} Welcome to Smart Method Chat`,
 
-`${premiumEmoji} Hey ${name}
-📌 Stay active & enjoy`,
+`${EMOJIS.fire} Hey ${name}
+${EMOJIS.pin} Stay active & enjoy`,
 
-`${premiumEmoji} Hey ${name}
-💬 Feel free to ask anything`,
+`${EMOJIS.rocket} Hey ${name}
+${EMOJIS.msg} Feel free to ask anything`,
 
-`${premiumEmoji} Hey ${name}
-📢 Join our channels below`,
+`${EMOJIS.target} Hey ${name}
+${EMOJIS.megaphone} Join our channels below`,
 
-`${premiumEmoji} Hey ${name}
-👑 You are now part of Smart Family`,
+`${EMOJIS.spark} Hey ${name}
+${EMOJIS.crown} You are now part of Smart Family`,
 
-`${premiumEmoji} Hey ${name}
-⚡ Don’t miss updates`,
+`${EMOJIS.global} Hey ${name}
+${EMOJIS.fire} Global community`,
 
-`${premiumEmoji} Hey ${name}
-📊 Learn & grow here`,
-
-`${premiumEmoji} Hey ${name}
+`${EMOJIS.gift} Hey ${name}
 🎉 Enjoy your stay`,
 
-`${premiumEmoji} Hey ${name}
-🔥 Global community`,
-
-`${premiumEmoji} Hey ${name}
-📌 Be active always`,
-
-`${premiumEmoji} Hey ${name}
-⚡ Let’s grow together`,
-
-`${premiumEmoji} Hey ${name}
-👋 Happy to have you`,
-
-`${premiumEmoji} Hey ${name}
-🔥 Follow rules`,
-
-`${premiumEmoji} Hey ${name}
-📣 Stay connected`,
-
-`${premiumEmoji} Hey ${name}
-👑 Smart Method Family`,
-
-`${premiumEmoji} Hey ${name}
-🚀 Explore opportunities`,
-
-`${premiumEmoji} Hey ${name}
-💬 Chat & learn`,
-
-`${premiumEmoji} Hey ${name}
-📌 Important member`,
-
-`${premiumEmoji} Hey ${name}
-👋 Welcome again`,
-
-`${premiumEmoji} Hey ${name}
-💬 Enjoy Smart Method Chat`
+`${EMOJIS.party} Hey ${name}
+${EMOJIS.wave} Welcome again`
 
       ];
 
@@ -200,25 +173,22 @@ bot.on("message", async (ctx) => {
 
               [
                 {
-                  text: "📢 Main Channel",
+                  text: `${EMOJIS.megaphone} Main Channel`,
                   url: mainLink
                 }
               ],
 
               [
                 {
-                  text:
-                    "🌍 Global Method Channel",
+                  text: `${EMOJIS.global} Global Channel`,
                   url: globalLink
                 }
               ],
 
               [
                 {
-                  text:
-                    "♻️ Generate",
-                  callback_data:
-                    "generate_links"
+                  text: `${EMOJIS.generate} Generate`,
+                  callback_data: "generate_links"
                 }
               ]
 
@@ -256,23 +226,21 @@ bot.on("message", async (ctx) => {
 
                     [
                       {
-                        text: "📢 Main Channel",
+                        text: `${EMOJIS.megaphone} Main Channel`,
                         url: mainLink
                       }
                     ],
 
                     [
                       {
-                        text:
-                          "🌍 Global Method Channel",
+                        text: `${EMOJIS.global} Global Channel`,
                         url: globalLink
                       }
                     ],
 
                     [
                       {
-                        text:
-                          "♻️ Generate",
+                        text: `${EMOJIS.generate} Generate`,
                         callback_data:
                           "generate_links"
                       }
@@ -292,8 +260,6 @@ bot.on("message", async (ctx) => {
 
       rotate();
 
-      /* auto delete */
-
       setTimeout(async () => {
 
         running = false;
@@ -305,36 +271,6 @@ bot.on("message", async (ctx) => {
         } catch {}
 
       }, 120000);
-
-    }
-
-    /* ================= LEFT MSG ================= */
-
-    if (ctx.message.left_chat_member) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
-
-    }
-
-    /* ================= TITLE CHANGE ================= */
-
-    if (ctx.message.new_chat_title) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
-
-    }
-
-    /* ================= PHOTO CHANGE ================= */
-
-    if (ctx.message.new_chat_photo) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
 
     }
 
@@ -365,7 +301,7 @@ bot.action(
           [
             {
               text:
-                "📢 Main Channel",
+                `${EMOJIS.megaphone} Main Channel`,
               url: mainLink
             }
           ],
@@ -373,7 +309,7 @@ bot.action(
           [
             {
               text:
-                "🌍 Global Method Channel",
+                `${EMOJIS.global} Global Channel`,
               url: globalLink
             }
           ],
@@ -381,7 +317,7 @@ bot.action(
           [
             {
               text:
-                "✅ Create Done",
+                `${EMOJIS.done} Create Done`,
               callback_data:
                 "generate_links"
             }
@@ -404,39 +340,51 @@ bot.start(async (ctx) => {
 
   return ctx.reply(
 
-`👋 Welcome ${ctx.from.first_name}`,
+`${EMOJIS.wave} Welcome ${ctx.from.first_name}`,
 
-    Markup.inlineKeyboard([
+    {
+      parse_mode: "HTML",
 
-      [
-        Markup.button.url(
-          "📢 Main Channel",
-          mainLink
-        )
-      ],
+      reply_markup: {
+        inline_keyboard: [
 
-      [
-        Markup.button.url(
-          "🌍 Global Method Channel",
-          globalLink
-        )
-      ],
+          [
+            {
+              text:
+                `${EMOJIS.megaphone} Main Channel`,
+              url: mainLink
+            }
+          ],
 
-      [
-        Markup.button.callback(
-          "♻️ Generate",
-          "generate_links"
-        )
-      ],
+          [
+            {
+              text:
+                `${EMOJIS.global} Global Channel`,
+              url: globalLink
+            }
+          ],
 
-      [
-        Markup.button.callback(
-          "✅ Joined",
-          "joined_ok"
-        )
-      ]
+          [
+            {
+              text:
+                `${EMOJIS.generate} Generate`,
+              callback_data:
+                "generate_links"
+            }
+          ],
 
-    ])
+          [
+            {
+              text:
+                `${EMOJIS.done} Joined`,
+              callback_data:
+                "joined_ok"
+            }
+          ]
+
+        ]
+      }
+    }
 
   );
 
@@ -451,7 +399,10 @@ bot.action(
     await ctx.answerCbQuery();
 
     return ctx.reply(
-      "✅ Bot Unlock Successful"
+      `${EMOJIS.done} Bot Unlock Successful`,
+      {
+        parse_mode: "HTML"
+      }
     );
 
   }
