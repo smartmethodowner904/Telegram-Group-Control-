@@ -22,16 +22,16 @@ let globalLink = "https://t.me/Global_Method_Channel";
 /* ================= PREMIUM EMOJIS ================= */
 
 const P = {
-fire: "<tg-emoji emoji-id="5368324170671202286">🔥</tg-emoji>",
-hi: "<tg-emoji emoji-id="5222102031224074514">👋</tg-emoji>",
-rocket: "<tg-emoji emoji-id="5350507166539783758">🚀</tg-emoji>",
-star: "<tg-emoji emoji-id="5357186884851771770">🌟</tg-emoji>",
-target: "<tg-emoji emoji-id="5357197206953169862">🎯</tg-emoji>",
-crown: "<tg-emoji emoji-id="5359459605665543692">👑</tg-emoji>",
-gift: "<tg-emoji emoji-id="5361735750968679136">🎁</tg-emoji>",
-global: "<tg-emoji emoji-id="5370869711888194012">🌍</tg-emoji>",
-msg: "<tg-emoji emoji-id="5443038326535759644">💬</tg-emoji>",
-spark: "<tg-emoji emoji-id="5224378213548571173">✨</tg-emoji>"
+fire: '<tg-emoji emoji-id="5368324170671202286">🔥</tg-emoji>',
+hi: '<tg-emoji emoji-id="5222102031224074514">👋</tg-emoji>',
+rocket: '<tg-emoji emoji-id="5350507166539783758">🚀</tg-emoji>',
+star: '<tg-emoji emoji-id="5357186884851771770">🌟</tg-emoji>',
+target: '<tg-emoji emoji-id="5357197206953169862">🎯</tg-emoji>',
+crown: '<tg-emoji emoji-id="5359459605665543692">👑</tg-emoji>',
+gift: '<tg-emoji emoji-id="5361735750968679136">🎁</tg-emoji>',
+global: '<tg-emoji emoji-id="5370869711888194012">🌍</tg-emoji>',
+msg: '<tg-emoji emoji-id="5443038326535759644">💬</tg-emoji>',
+spark: '<tg-emoji emoji-id="5224378213548571173">✨</tg-emoji>'
 };
 
 /* ================= SLEEP ================= */
@@ -101,7 +101,7 @@ console.log(err);
 
 });
 
-/* ================= WELCOME SYSTEM ================= */
+/* ================= MESSAGE SYSTEM ================= */
 
 bot.on("message", async (ctx) => {
 
@@ -114,7 +114,7 @@ const members =
   ctx.message.new_chat_members ||
   ctx.update.message.new_chat_members;
 
-/* ================= NEW MEMBER ================= */
+/* ================= JOIN DETECT ================= */
 
 if (members && members.length > 0) {
 
@@ -185,9 +185,11 @@ if (members && members.length > 0) {
   setTimeout(async () => {
 
     try {
+
       await ctx.deleteMessage(
         ctx.message.message_id
       );
+
     } catch {}
 
   }, 3000);
@@ -256,16 +258,18 @@ if (members && members.length > 0) {
 
   rotate();
 
-  /* auto delete welcome */
+  /* auto delete welcome msg */
 
   setTimeout(async () => {
 
     running = false;
 
     try {
+
       await ctx.deleteMessage(
         msg.message_id
       );
+
     } catch {}
 
   }, 120000);
@@ -276,17 +280,17 @@ if (members && members.length > 0) {
 
 if (ctx.message.left_chat_member) {
 
-  try {
+  setTimeout(async () => {
 
-    setTimeout(async () => {
+    try {
 
       await ctx.deleteMessage(
         ctx.message.message_id
       );
 
-    }, 3000);
+    } catch {}
 
-  } catch {}
+  }, 3000);
 
 }
 
@@ -295,9 +299,11 @@ if (ctx.message.left_chat_member) {
 if (ctx.message.new_chat_title) {
 
   try {
+
     await ctx.deleteMessage(
       ctx.message.message_id
     );
+
   } catch {}
 
 }
@@ -307,9 +313,11 @@ if (ctx.message.new_chat_title) {
 if (ctx.message.new_chat_photo) {
 
   try {
+
     await ctx.deleteMessage(
       ctx.message.message_id
     );
+
   } catch {}
 
 }
@@ -439,10 +447,13 @@ async (ctx) => {
 await ctx.answerCbQuery();
 
 return ctx.reply(
-  `${P.fire} Bot Unlock Successful`,
+
+"${P.fire} Bot Unlock Successful",
+
   {
     parse_mode: "HTML"
   }
+
 );
 
 }
