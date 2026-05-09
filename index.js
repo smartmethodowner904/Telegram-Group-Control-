@@ -117,66 +117,71 @@ bot.on("message", async (ctx) => {
 
       const name = user.first_name;
 
+      /* PREMIUM EMOJI */
+
+      const premiumEmoji =
+`<tg-emoji emoji-id="5368324170671202286">🔥</tg-emoji>`;
+
       const messages = [
 
-`🎊 Hey ${name}
+`${premiumEmoji} Hey ${name}
 👋 Welcome to Smart Method Chat`,
 
-`🔥 Hey ${name}
+`${premiumEmoji} Hey ${name}
 📌 Stay active & enjoy`,
 
-`🚀 Hey ${name}
+`${premiumEmoji} Hey ${name}
 💬 Feel free to ask anything`,
 
-`🎯 Hey ${name}
+`${premiumEmoji} Hey ${name}
 📢 Join our channels below`,
 
-`✨ Hey ${name}
+`${premiumEmoji} Hey ${name}
 👑 You are now part of Smart Family`,
 
-`📣 Hey ${name}
+`${premiumEmoji} Hey ${name}
 ⚡ Don’t miss updates`,
 
-`💡 Hey ${name}
+`${premiumEmoji} Hey ${name}
 📊 Learn & grow here`,
 
-`🎁 Hey ${name}
+`${premiumEmoji} Hey ${name}
 🎉 Enjoy your stay`,
 
-`🌍 Hey ${name}
+`${premiumEmoji} Hey ${name}
 🔥 Global community`,
 
-`💬 Hey ${name}
+`${premiumEmoji} Hey ${name}
 📌 Be active always`,
 
-`🚀 Hey ${name}
+`${premiumEmoji} Hey ${name}
 ⚡ Let’s grow together`,
 
-`🎊 Hey ${name}
+`${premiumEmoji} Hey ${name}
 👋 Happy to have you`,
 
-`📢 Hey ${name}
+`${premiumEmoji} Hey ${name}
 🔥 Follow rules`,
 
-`💡 Hey ${name}
+`${premiumEmoji} Hey ${name}
 📣 Stay connected`,
 
-`🎯 Hey ${name}
+`${premiumEmoji} Hey ${name}
 👑 Smart Method Family`,
 
-`✨ Hey ${name}
+`${premiumEmoji} Hey ${name}
 🚀 Explore opportunities`,
 
-`📊 Hey ${name}
+`${premiumEmoji} Hey ${name}
 💬 Chat & learn`,
 
-`🔥 Hey ${name}
+`${premiumEmoji} Hey ${name}
 📌 Important member`,
 
-`🎊 Hey ${name}
+`${premiumEmoji} Hey ${name}
 👋 Welcome again`,
 
-`🌟 Hey ${name}
+`${premiumEmoji} Hey ${name}
 💬 Enjoy Smart Method Chat`
 
       ];
@@ -187,30 +192,39 @@ bot.on("message", async (ctx) => {
 
         messages[0],
 
-        Markup.inlineKeyboard([
+        {
+          parse_mode: "HTML",
 
-          [
-            Markup.button.url(
-              "📢 Main Channel",
-              mainLink
-            )
-          ],
+          reply_markup: {
+            inline_keyboard: [
 
-          [
-            Markup.button.url(
-              "🌍 Global Method Channel",
-              globalLink
-            )
-          ],
+              [
+                {
+                  text: "📢 Main Channel",
+                  url: mainLink
+                }
+              ],
 
-          [
-            Markup.button.callback(
-              "♻️ Generate",
-              "generate_links"
-            )
-          ]
+              [
+                {
+                  text:
+                    "🌍 Global Method Channel",
+                  url: globalLink
+                }
+              ],
 
-        ])
+              [
+                {
+                  text:
+                    "♻️ Generate",
+                  callback_data:
+                    "generate_links"
+                }
+              ]
+
+            ]
+          }
+        }
 
       );
 
@@ -235,6 +249,8 @@ bot.on("message", async (ctx) => {
               messages[index],
 
               {
+                parse_mode: "HTML",
+
                 reply_markup: {
                   inline_keyboard: [
 
