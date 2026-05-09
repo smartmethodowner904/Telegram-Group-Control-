@@ -86,38 +86,27 @@ bot.on("chat_join_request", async (ctx) => {
 
 });
 
-/* ================= MESSAGE SYSTEM ================= */
+/* ================= WELCOME SYSTEM ================= */
 
-bot.on("message", async (ctx) => {
+bot.on("new_chat_members", async (ctx) => {
 
   try {
 
     if (!GROUPS.includes(ctx.chat.id))
       return;
 
-    /* ================= JOIN DETECT FIX ================= */
+    const user =
+      ctx.message.new_chat_members[0];
 
-    const members =
-      ctx.message.new_chat_members ||
-      ctx.update.message.new_chat_members;
+    const name = user.first_name;
 
-    if (members) {
+    /* CREATE NEW LINKS */
 
-      try {
-        await ctx.deleteMessage(
-          ctx.message.message_id
-        );
-      } catch {}
+    await createLinks(ctx);
 
-      /* create fresh links */
+    /* SEND WELCOME FIRST */
 
-      await createLinks(ctx);
-
-      const user = members[0];
-
-      const name = user.first_name;
-
-      const messages = [
+    const messages = [
 
 `🎊 Hey ${name}
 👋 Welcome to Smart Method Chat`,
@@ -179,148 +168,135 @@ bot.on("message", async (ctx) => {
 `🌟 Hey ${name}
 💬 Enjoy Smart Method Chat`
 
-      ];
+    ];
 
-      let index = 0;
+    let index = 0;
 
-      const msg = await ctx.reply(
+    const msg = await ctx.reply(
 
-        messages[0],
+      messages[0],
 
-        Markup.inlineKeyboard([
+      Markup.inlineKeyboard([
 
-          [
-            Markup.button.url(
-              "📢 Main Channel",
-              mainLink
-            )
-          ],
+        [
+          Markup.button.url(
+            "📢 Main Channel",
+            mainLink
+          )
+        ],
 
-          [
-            Markup.button.url(
-              "🌍 Global Method Channel",
-              globalLink
-            )
-          ],
+        [
+          Markup.button.url(
+            "🌍 Global Method Channel",
+            globalLink
+          )
+        ],
 
-          [
-            Markup.button.callback(
-              "♻️ Generate",
-              "generate_links"
-            )
-          ]
+        [
+          Markup.button.callback(
+            "♻️ Generate",
+            "generate_links"
+          )
+        ]
 
-        ])
+      ])
 
-      );
+    );
 
-      let running = true;
+    /* DELETE TELEGRAM JOIN MESSAGE AFTER */
 
-      async function rotate() {
+    setTimeout(async () => {
 
-        while (running) {
+      try {
 
-          await sleep(3000);
+        await ctx.deleteMessage(
+          ctx.message.message_id
+        );
 
-          try {
+      } catch {}
 
-            index =
-              (index + 1) % messages.length;
+    }, 5000);
 
-            await ctx.telegram.editMessageText(
+    let running = true;
 
-              ctx.chat.id,
-              msg.message_id,
-              undefined,
-              messages[index],
+    /* ROTATING TEXT */
 
-              {
-                reply_markup: {
-                  inline_keyboard: [
+    async function rotate() {
 
-                    [
-                      {
-                        text: "📢 Main Channel",
-                        url: mainLink
-                      }
-                    ],
+      while (running) {
 
-                    [
-                      {
-                        text:
-                          "🌍 Global Method Channel",
-                        url: globalLink
-                      }
-                    ],
+        await sleep(3000);
 
-                    [
-                      {
-                        text:
-                          "♻️ Generate",
-                        callback_data:
-                          "generate_links"
-                      }
-                    ]
+        try {
 
+          index =
+            (index + 1) % messages.length;
+
+          await ctx.telegram.editMessageText(
+
+            ctx.chat.id,
+            msg.message_id,
+            undefined,
+            messages[index],
+
+            {
+              reply_markup: {
+                inline_keyboard: [
+
+                  [
+                    {
+                      text:
+                        "📢 Main Channel",
+                      url: mainLink
+                    }
+                  ],
+
+                  [
+                    {
+                      text:
+                        "🌍 Global Method Channel",
+                      url: globalLink
+                    }
+                  ],
+
+                  [
+                    {
+                      text:
+                        "♻️ Generate",
+                      callback_data:
+                        "generate_links"
+                    }
                   ]
-                }
+
+                ]
               }
+            }
 
-            );
+          );
 
-          } catch {}
-
-        }
+        } catch {}
 
       }
 
-      rotate();
-
-      /* auto delete */
-
-      setTimeout(async () => {
-
-        running = false;
-
-        try {
-          await ctx.deleteMessage(
-            msg.message_id
-          );
-        } catch {}
-
-      }, 120000);
-
     }
 
-    /* ================= LEFT MSG ================= */
+    rotate();
 
-    if (ctx.message.left_chat_member) {
+    /* AUTO DELETE WELCOME */
 
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
+    setTimeout(async () => {
 
-    }
+      running = false;
 
-    /* ================= TITLE CHANGE ================= */
+      try {
 
-    if (ctx.message.new_chat_title) {
+        await ctx.deleteMessage(
+          msg.message_id
+        );
 
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
+      } catch {}
 
-    }
-
-    /* ================= PHOTO CHANGE ================= */
-
-    if (ctx.message.new_chat_photo) {
-
-      return ctx.deleteMessage(
-        ctx.message.message_id
-      );
-
-    }
+    }, 120000);
 
   } catch (err) {
     console.log(err);
@@ -381,6 +357,49 @@ bot.action(
 
   }
 );
+
+/* ================= CLEAN SYSTEM ================= */
+
+bot.on("message", async (ctx) => {
+
+  try {
+
+    if (!GROUPS.includes(ctx.chat.id))
+      return;
+
+    /* DELETE LEFT MESSAGE */
+
+    if (ctx.message.left_chat_member) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+    /* DELETE TITLE CHANGE */
+
+    if (ctx.message.new_chat_title) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+    /* DELETE PHOTO CHANGE */
+
+    if (ctx.message.new_chat_photo) {
+
+      return ctx.deleteMessage(
+        ctx.message.message_id
+      );
+
+    }
+
+  } catch {}
+
+});
 
 /* ================= START ================= */
 
